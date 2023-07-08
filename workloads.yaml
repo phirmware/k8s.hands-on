@@ -1,0 +1,199 @@
+# Queue deployment
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: fleetman-queue
+  namespace: default
+  labels:
+    app: fleetman-queue
+
+spec:
+  selector:
+    matchLabels:
+      app: fleetman-queue
+
+  replicas: 1
+
+  template:
+    metadata:
+      labels:
+        app: fleetman-queue
+
+    spec:
+      containers:
+        - name: fleetman-queue
+          image: richardchesterwood/k8s-fleetman-queue:release2
+
+          # resources:
+          #   requests:
+          #     cpu: 100m
+          #     memory: 100Mi
+          #   limits:
+          #     cpu: 100m
+          #     memory: 100Mi
+
+      restartPolicy: Always
+
+---
+# Simulator deployment, sends location data to the queue
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: fleetman-simulator
+  namespace: default
+  labels:
+    app: fleetman-simulator
+
+spec:
+  selector:
+    matchLabels:
+      app: fleetman-simulator
+  replicas: 1
+
+  template:
+    metadata:
+      labels:
+        app: fleetman-simulator
+
+    spec:
+      containers:
+        - name: fleetman-simulator
+          image: richardchesterwood/k8s-fleetman-position-simulator:release2
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: production-microservice
+
+          # resources:
+          #   requests:
+          #     cpu: 100m
+          #     memory: 100Mi
+          #   limits:
+          #     cpu: 100m
+          #     memory: 100Mi
+
+      restartPolicy: Always
+
+---
+# position tracker deployment
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: fleetman-position-tracker
+  namespace: default
+  labels:
+    app: fleetman-position-tracker
+
+spec:
+  selector:
+    matchLabels:
+      app: fleetman-position-tracker
+  replicas: 1
+
+  template:
+    metadata:
+      labels:
+        app: fleetman-position-tracker
+
+    spec:
+      containers:
+        - name: fleetman-position-tracker
+          image: richardchesterwood/k8s-fleetman-position-tracker:release3
+
+          # resources:
+          #   requests:
+          #     cpu: 100m
+          #     memory: 100Mi
+          #   limits:
+          #     cpu: 100m
+          #     memory: 100Mi
+
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: production-microservice
+
+      restartPolicy: Always
+
+---
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: api-gateway
+  namespace: default
+  labels:
+    app: api-gateway
+
+spec:
+  selector:
+    matchLabels:
+      app: api-gateway
+
+  replicas: 1
+
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+
+    spec:
+      containers:
+        - name: api-gateway
+          image: richardchesterwood/k8s-fleetman-api-gateway:release2
+
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: production-microservice
+
+          # resources:
+          #   requests:
+          #     cpu: 100m
+          #     memory: 100Mi
+          #   limits:
+          #     cpu: 100m
+          #     memory: 100Mi
+
+      restartPolicy: Always
+
+---
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: web-app
+  namespace: default
+  labels:
+    app: web-app
+
+spec:
+  selector:
+    matchLabels:
+      app: web-app
+
+  replicas: 1
+
+  template:
+    metadata:
+      labels:
+        app: web-app
+
+    spec:
+      containers:
+        - name: web-app
+          image: richardchesterwood/k8s-fleetman-webapp-angular:release2
+
+          # resources:
+          #   requests:
+          #     cpu: 100m
+          #     memory: 100Mi
+          #   limits:
+          #     cpu: 100m
+          #     memory: 100Mi
+
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: production-microservice
+
+      restartPolicy: Always

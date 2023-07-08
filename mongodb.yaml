@@ -1,0 +1,63 @@
+# Mongo DB for the position tracker service
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: mongodb
+  namespace: default
+  labels:
+    app: mongodb
+
+spec:
+  selector:
+    matchLabels:
+      app: mongodb
+
+  replicas: 1
+
+  template:
+    metadata:
+      labels:
+        app: mongodb
+
+    spec:
+      containers:
+        - name: mongodb
+          image: mongo:3.6.5-jessie
+
+          volumeMounts:
+            - name: mongo-persistent-storage
+              mountPath: /data/db
+
+      volumes:
+        - name: mongo-persistent-storage
+          persistentVolumeClaim:
+            claimName: mongodb-storage
+
+          # resources:
+          #   requests:
+          #     cpu: 100m
+          #     memory: 100Mi
+          #   limits:
+          #     cpu: 100m
+          #     memory: 100Mi
+
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: fleetman-mongodb
+  namespace: default
+
+spec:
+  selector:
+    app: mongodb
+
+  type: ClusterIP
+
+  ports:
+    - name: mongodb
+      port: 27017
